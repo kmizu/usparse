@@ -77,14 +77,6 @@ package object usparse {
     }
   }
 
-  def chainl[T](p: Parser[T])(q: Parser[(T, T) => T]): Parser[T] = {
-    (p ~ (q ~ p).*).map { case x ~ xs =>
-      xs.foldLeft(x) { case (a, f ~ b) =>
-        f(a, b)
-      }
-    }
-  }
-
   final def $(literal: String): Parser[String] = {input =>
     if(literal.length > 0 && input.length == 0) {
       Failure("")
