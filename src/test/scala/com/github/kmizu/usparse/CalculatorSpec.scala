@@ -5,21 +5,19 @@ import org.scalatest.{DiagrammedAssertions, FunSpec}
 class CalculatorSpec extends FunSpec with DiagrammedAssertions {
   object Calculator {
     def E: P[Int] = rule(A)
-    def A: Parser[Int] = rule {
-      M ~ ($("+") ~ M | $("-") ~ M).* ^^ {case x ~ ys =>
-        ys.foldLeft(x){ case (l, op ~ r) => if(op == "+") l + r else l -r }
-      }
+    def A: P[Int] = rule {
+      (M ~ ($("+") ~ M | $("-") ~ M).*).map {case x ~ ys =>
+        ys.foldLeft(x){ case (l, op ~ r) => if(op == "+") l + r else l -r } }
     }
-    def M: Parser[Int] = rule {
-      P ~ ($("*") ~ P | $("/") ~ P).* ^^ { case x ~ ys =>
-        ys.foldLeft(x) { case (l, op ~ r) => if (op == "*") l * r else l / r }
-      }
+    def M: P[Int] = rule {
+      (P ~ ($("*") ~ P | $("/") ~ P).*).map { case x ~ ys =>
+        ys.foldLeft(x) { case (l, op ~ r) => if (op == "*") l * r else l / r } }
     }
-    def P: P[Int] = rule{
-      (for { _ <- $("("); e <- E; _ <- $(")")} yield e) | number
+    def P: P[Int] = rule {
+      ($("(") ~ E ~ $(")")).map { case _ ~ e ~ _ => e } | N
     }
-    def number: P[Int] = rule {
-      ('0' to '9').map{c => $(c.toString) ^^ (_.toInt)}.reduce((p1, p2) => p1 | p2)
+    def N: P[Int] = rule {
+      ('0' to '9').map{c => $(c.toString).map(_.toInt)}.reduce((p1, p2) => p1 | p2)
     }
   }
 

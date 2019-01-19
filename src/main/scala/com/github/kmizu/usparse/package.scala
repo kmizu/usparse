@@ -64,17 +64,6 @@ package object usparse {
         case failure@Failure(_) => failure
       }
     }
-
-    def ^^[B](function: A => B): Parser[B] = map(function)
-
-    def flatMap[B](function: A => Parser[B]): Parser[B] = {input =>
-      self(input) match {
-        case Success(value, next) =>
-          function(value)(next)
-        case failure@Failure(_) =>
-          failure
-      }
-    }
   }
 
   final def $(literal: String): Parser[String] = {input =>
